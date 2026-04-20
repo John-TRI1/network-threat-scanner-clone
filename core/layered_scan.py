@@ -1,8 +1,11 @@
 from scapy.all import ARP, Ether, srp, IP, ICMP, sr, TCP, sr1
 import ipaddress
 import sys
+import time
 from ping3 import ping
 from multiprocessing.pool import ThreadPool as Pool
+
+METRICS_FILE = 'data/metrics_log.txt'  # this is where the scan summary gets saved
 
 #layer 1: ICMP PING SWEEP
 #Create ICMP packet and send it to the network and see which devices respond
@@ -31,7 +34,13 @@ def arp_scan(ip):
 
 def run_scan():
 	target_ip = input(f'Enter the IP address you want to scan (ie: 192.168.1.0/24): ') 
+	scan_start = time.time()  # save the time so we can see how long the scan took
 	ip_list = [str(ip) for ip in ipaddress.ip_network(target_ip, strict=False).hosts()]
+	checked_hosts = len(ip_list)  # count how many host addresses we checked
+
+	# this marks where this test starts in the log file
+	with open(METRICS_FILE, "a") as file:  # open the summary log file
+		file.write(f'\n===== TEST START =====\n')  # mark where this test starts
 	
 	with Pool() as pool:
 		results = pool.map(ping_sweep,  ip_list)
@@ -50,6 +59,14 @@ def run_scan():
 	with open("known_hosts.txt", "w") as file:
 		for ip in all_alive:
 			file.write(ip + "\n")
+
+	scan_end = time.time()  # grab the time again when the scan is done
+	scan_time = scan_end - scan_start  # this gives us the total scan time
+
+	# this writes the scan info in one clean line
+	with open(METRICS_FILE, "a") as file:  # open the summary log file again to save this run
+		file.write(f'SCAN | Target: {target_ip} | Checked: {checked_hosts} | ICMP: {len(alive)} | ARP: {len(arp_alive)} | TOTAL: {len(all_alive)} | TIME: {scan_time:.2f}s\n')  # save the scan results in one line
+		file.write(f'===== TEST END =====\n\n')  # mark where this test ends
 
 def user_scan(userIP):
 	target_ip = userIP

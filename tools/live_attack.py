@@ -7,6 +7,7 @@ import time
 from scapy.all import ARP, Ether, IP, TCP, conf, get_if_addr, send, sendp
 
 REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+METRICS_FILE = 'data/metrics_log.txt'  # this is where the attack summary gets saved
 if REPO_ROOT not in sys.path:
     sys.path.insert(0, REPO_ROOT)
 
@@ -113,6 +114,11 @@ def rst_flood(
 
 
 def main() -> None:
+    attack_start = time.time()  # save the time before the attack starts
+    # this marks where this test starts in the log file
+    with open(METRICS_FILE, 'a') as file:  # open the summary log file
+        file.write(f'\n===== TEST START =====\n')  # mark where this test starts
+
     parser = argparse.ArgumentParser(
         description=(
             "Lab-only traffic generator meant to be run alongside live monitoring (main.py).\n"
@@ -157,6 +163,7 @@ def main() -> None:
     parser.add_argument("--rst-count", type=int, default=200)
 
     args = parser.parse_args()
+    total_packets = 0  # keep track of how many packets this attack sends
 
     if not args.dry_run:
         _require_root()
@@ -185,6 +192,7 @@ def main() -> None:
 
     if args.mode in ("arp", "all"):
         arp_inconsistency(attacker_ip, args.victim_ip, iface=iface, pps=pps, dry_run=args.dry_run)
+        total_packets += 2  # two arp reply packets get sent here
 
     if args.mode in ("portscan", "all"):
         syn_port_sweep(
@@ -196,6 +204,7 @@ def main() -> None:
             pps=pps,
             dry_run=args.dry_run,
         )
+        total_packets += (args.port_max - args.port_min + 1)  # count how many ports we tried
 
     if args.mode in ("synflood", "all"):
         syn_flood(
@@ -207,6 +216,7 @@ def main() -> None:
             pps=pps,
             dry_run=args.dry_run,
         )
+        total_packets += args.syn_count  # count how many syn packets we sent
 
     if args.mode in ("rstflood", "all"):
         rst_flood(
@@ -218,6 +228,20 @@ def main() -> None:
             pps=pps,
             dry_run=args.dry_run,
         )
+        total_packets += args.rst_count  # count how many rst packets we sent
+
+    attack_end = time.time()  # grab the time again when the attack is done
+    attack_time = attack_end - attack_start  # this gives the full attack time
+
+    if attack_time > 0:  # make sure we do not divide by zero
+        packets_per_second = total_packets / attack_time  # quick packets per second number
+    else:
+        packets_per_second = 0  # fallback if something weird happens with the timer
+
+    # this writes the attack info in one clean line
+    with open(METRICS_FILE, 'a') as file:  # open the summary log file again to save this run
+        file.write(f'ATTACK | Mode: {args.mode} | Victim: {args.victim_ip} | Packets: {total_packets} | Time: {attack_time:.2f}s | PPS: {packets_per_second:.2f}\n')  # save the attack results in one line
+        file.write(f'===== TEST END =====\n\n')  # mark where this test ends
 
     print("[*] Done.")
 
