@@ -1,3 +1,4 @@
+#Runs scanner
 from scapy.all import sniff, ARP, TCP, IP
 from core import layered_scan
 from core.alert import load_persistence
@@ -13,3 +14,4 @@ if __name__ == '__main__':
     # 2. Run your sniffer
     print("\n[*] Scan finished. Starting live threat monitor...")
     sniff(filter="arp or tcp", prn=process_packet, store=0)
+

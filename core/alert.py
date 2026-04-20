@@ -34,6 +34,23 @@ def get_security_status(score):
     elif score < 200: return ("DANGEROUS", "Isolate host")
     else: return ("HOSTILE", "KICK FROM NETWORK")
 
+def get_frontend_data():
+    results = []
+    
+    for ip, data in threats.items():
+
+        status, action = get_security_status(data["score"])
+
+        results.append({
+            "ip": ip,
+            "score": data["score"],
+            "status": status,
+            "action": action,
+            "attacks": ", ".join(data["attacks"]) if data["attacks"] else "None"
+        })
+
+    return results
+
 def log_alert(alert_type, src_ip, dst_ip="N/A", port="N/A"):
     if src_ip not in threats:
         threats[src_ip] = {'score': 0, 'dst': dst_ip, 'port': port, 'attacks': set()}

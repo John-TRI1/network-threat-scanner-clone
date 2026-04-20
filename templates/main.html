@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang = "en">
+
+<head>
+    <meta charset = "UTF-8">
+    <title>Scanner and Response Demo</title>
+    <link rel = "stylesheet" href = "/static/style.css">
+    <script type = "text/javascript" src = "/static/wiring.js" defer></script>
+</head>
+
+<body>
+    <div class = "container">
+        <h1>NETWORK THREAT SCANNER</h1>
+    
+        <h2>IP to Scan</h2>
+        <form id = "scanForm">
+            <input
+                type = "text"
+                id = "ipInput"
+                name = "ip"
+                placeholder = "e.g. 192.168.1.0/24"
+                required
+            />
+        <button type = "submit">Start Scanning</button>
+        </form>
+
+        <h2>Devices Found</h2>
+
+        <table id = "scanTable">
+            <thead>
+                <tr>
+                    <th>IP Address</th>
+                    <th>Discovery Method</th>
+                </tr>
+            </thead>
+
+            <tbody id = "scanResults"></tbody>
+        </table>
+
+        <h2>Threat Dashboard</h2>
+
+        <table id = "threatTable">
+            <thead>
+                <tr>
+                    <th>IP</th>
+                    <th>Score</th>
+                    <th>Status</th>
+                    <th>Attacks</th>
+                </tr>
+            </thead>
+
+            <tbody id = "threatInfo"></tbody>
+        </table>
+    </div>
+</body>
+
+</html>

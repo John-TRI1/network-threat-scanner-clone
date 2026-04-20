@@ -2,7 +2,7 @@ from scapy.all import ARP, Ether, srp, IP, ICMP, sr, TCP, sr1
 import ipaddress
 import sys
 from ping3 import ping
-from multiprocessing import Pool
+from multiprocessing.pool import ThreadPool as Pool
 
 #layer 1: ICMP PING SWEEP
 #Create ICMP packet and send it to the network and see which devices respond
@@ -50,6 +50,27 @@ def run_scan():
 	with open("known_hosts.txt", "w") as file:
 		for ip in all_alive:
 			file.write(ip + "\n")
+
+def user_scan(userIP):
+	target_ip = userIP
+	ip_list = [str(ip) for ip in ipaddress.ip_network(target_ip, strict=False).hosts()]
+	
+	with Pool() as pool:
+		results = pool.map(ping_sweep,  ip_list)
+	alive = [ip for ip in results if ip is not None]
+	remaining = [ip for ip in ip_list if ip not in alive]
+
+	with Pool() as pool: 
+		arp_results = pool.map(arp_scan, remaining)
+	arp_alive = [ip for ip in arp_results if ip is not None]
+
+	all_alive = sorted(set(alive) | set(arp_alive))
+	
+	return {
+		"alive" : alive,
+		"arp_alive" : arp_alive,
+		"all_hosts" : all_alive
+	}
 
 if __name__ == '__main__':
     run_scan()
