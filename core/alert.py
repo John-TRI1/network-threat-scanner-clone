@@ -3,9 +3,23 @@ import re
 from datetime import datetime
 
 LOG_FILE = 'data/threat_log.txt'
+METRICS_FILE = 'data/metrics_log.txt'
 SCORES = {'ARP_SPOOF': 50, 'PORT_SCAN': 20, 'SYN_FLOOD': 30, 'RST_FLOOD': 10}
 
 threats = {}
+
+def reset_demo_state():
+    """Clears the saved threat state and the demo log files for a fresh run."""
+    threats.clear()
+
+    for file_path in (LOG_FILE, METRICS_FILE):
+        folder = os.path.dirname(file_path)
+        if folder:
+            os.makedirs(folder, exist_ok=True)
+
+        # this wipes the old demo logs so the next run starts clean
+        with open(file_path, 'w') as f:
+            f.write("")
 
 def load_persistence():
     """Reads the log file to resume scores from the last session."""

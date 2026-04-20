@@ -1,7 +1,7 @@
 # Runs scanner
 from scapy.all import sniff, ARP, TCP, IP
 from core import layered_scan
-from core.alert import load_persistence
+from core.alert import load_persistence, reset_demo_state
 from modules.arp_monitor import check_arp
 from modules.port_scan_det import check_port_scan
 from modules.brute_force_det import analyze_packet
@@ -15,6 +15,9 @@ def start_scanner(ip):
 from flask import Flask, render_template, request, jsonify
 from core.alert import get_frontend_data
 from threading import Thread
+
+# this clears the old logs and threat memory every time the frontend starts
+reset_demo_state()
 
 app = Flask(__name__)
 
@@ -57,4 +60,5 @@ def threats():
     return jsonify(get_frontend_data())
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    # turning the reloader off keeps it to one clean frontend process
+    app.run(debug=True, use_reloader=False)

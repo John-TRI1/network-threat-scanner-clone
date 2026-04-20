@@ -11,11 +11,12 @@ setInterval(async () => {
                 <td>${threat.ip}</td>
                 <td>${threat.score}</td>
                 <td>${threat.status}</td>
+                <td>${threat.action}</td>
                 <td>${threat.attacks}</td>
             </tr>`;
         });
     } else {
-        threatTable.innerHTML = "<tr><td colspan='4'>No threats detected.</td></tr>";
+        threatTable.innerHTML = "<tr><td colspan='5'>No threats detected.</td></tr>";
     }
 }, 3000);
 
