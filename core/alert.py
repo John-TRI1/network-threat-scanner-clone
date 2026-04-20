@@ -2,7 +2,7 @@ import os
 import re
 from datetime import datetime
 
-LOG_FILE = 'threat_log.txt'
+LOG_FILE = 'data/threat_log.txt'
 SCORES = {'ARP_SPOOF': 50, 'PORT_SCAN': 20, 'SYN_FLOOD': 30, 'RST_FLOOD': 10}
 
 threats = {}

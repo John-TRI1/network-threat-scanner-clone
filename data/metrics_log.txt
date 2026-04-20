@@ -1,0 +1,6 @@
+SCAN | Target: 192.168.1.0/30 | Checked: 2 | ICMP: 0 | ARP: 0 | TOTAL: 0 | TIME: 2.05s
+
+===== TEST START =====
+ATTACK | Mode: all | Victim: 192.168.1.254 | Packets: 522 | Time: 1.60s | PPS: 326.18
+===== TEST END =====
+

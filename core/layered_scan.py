@@ -70,7 +70,9 @@ def run_scan():
 
 def user_scan(userIP):
 	target_ip = userIP
+	scan_start = time.time()  # save the time so we can see how long the scan took
 	ip_list = [str(ip) for ip in ipaddress.ip_network(target_ip, strict=False).hosts()]
+	checked_hosts = len(ip_list)  # count how many host addresses we checked
 	
 	with Pool() as pool:
 		results = pool.map(ping_sweep,  ip_list)
@@ -82,6 +84,13 @@ def user_scan(userIP):
 	arp_alive = [ip for ip in arp_results if ip is not None]
 
 	all_alive = sorted(set(alive) | set(arp_alive))
+
+	scan_end = time.time()  # grab the time again when the scan is done
+	scan_time = scan_end - scan_start  # this gives us the total scan time
+
+	# this saves one scan summary line for the frontend path too
+	with open(METRICS_FILE, "a") as file:
+		file.write(f'SCAN | Target: {target_ip} | Checked: {checked_hosts} | ICMP: {len(alive)} | ARP: {len(arp_alive)} | TOTAL: {len(all_alive)} | TIME: {scan_time:.2f}s\n')
 	
 	return {
 		"alive" : alive,
